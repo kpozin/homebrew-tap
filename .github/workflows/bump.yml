@@ -1,0 +1,40 @@
+name: Bump
+
+# The Sprawl Guard release workflow starts this workflow, which opens a pull request that moves the
+# formula to the release's source archive.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Sprawl Guard release tag, such as v0.5.1
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sprawl-guard:
+    runs-on: ubuntu-24.04
+    # Tapping and opening the pull request take a few minutes; a hang means Homebrew is stuck.
+    timeout-minutes: 20
+    steps:
+      - name: Open the formula bump pull request
+        shell: bash
+        run: |
+          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag must be a release tag such as v0.5.1, not ${TAG}"
+            exit 1
+          fi
+          # The runner image ships Homebrew without putting it on PATH.
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew tap kpozin/tap
+          brew bump-formula-pr --no-browse --no-fork \
+            --url "https://github.com/kpozin/sprawl-guard/archive/refs/tags/${TAG}.tar.gz" \
+            kpozin/tap/sprawl-guard
+        env:
+          HOMEBREW_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          HOMEBREW_GIT_NAME: github-actions[bot]
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
