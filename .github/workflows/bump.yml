@@ -23,9 +23,12 @@ jobs:
       - name: Open the formula bump pull request
         shell: bash
         run: |
-          if [[ ! "${TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::tag must be a release tag such as v0.5.1, not ${TAG}"
-            exit 1
+          # The formula follows GitHub's latest release, so prereleases and stable releases published
+          # outside the latest channel leave it alone.
+          latest="$(gh api repos/kpozin/sprawl-guard/releases/latest --jq .tag_name)"
+          if [[ "${TAG}" != "${latest}" ]]; then
+            echo "::notice::Skipping ${TAG}, because the latest Sprawl Guard release is ${latest}"
+            exit 0
           fi
           # The runner image ships Homebrew without putting it on PATH.
           eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -34,6 +37,7 @@ jobs:
             --url "https://github.com/kpozin/sprawl-guard/archive/refs/tags/${TAG}.tar.gz" \
             kpozin/tap/sprawl-guard
         env:
+          GH_TOKEN: ${{ github.token }}
           HOMEBREW_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
           HOMEBREW_GIT_NAME: github-actions[bot]
           HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
