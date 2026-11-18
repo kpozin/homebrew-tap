@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Move Formula/sprawl-guard.rb to a Sprawl Guard release.
 
-Each platform's archive URL gets the new tag and version, and its sha256 becomes the
-digest that GitHub recorded for that release asset. Before the formula changes, each
-archive is downloaded and its attestation verified, which confirms that the Sprawl Guard
-release workflow built it from the tag. Needs an authenticated `gh`.
+Only GitHub's latest release moves the formula; any other tag leaves it unchanged. Each
+platform's archive URL gets the new tag and version, and its sha256 becomes the digest
+that GitHub recorded for that release asset. Before the formula changes, each archive is
+downloaded and its attestation verified, which confirms that the Sprawl Guard release
+workflow built it from the tag. Needs an authenticated `gh`.
 """
 
 import argparse
@@ -91,6 +92,14 @@ def main() -> None:
     if (match := TAG_PATTERN.fullmatch(tag)) is None:
         parser.error(f"{tag} isn't a release tag such as v0.5.1")
     version = match["version"]
+    # Prereleases, stable releases outside the latest channel, and releases older than
+    # the latest one leave the formula alone.
+    latest = gh(
+        "api", f"repos/{REPOSITORY}/releases/latest", "--jq", ".tag_name"
+    ).strip()
+    if tag != latest:
+        print(f"Skipping {tag}, because the latest Sprawl Guard release is {latest}")
+        return
     digests = asset_digests(tag)
 
     def replace(archive: re.Match[str]) -> str:

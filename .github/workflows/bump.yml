@@ -23,16 +23,11 @@ jobs:
       - name: Open the formula bump pull request
         shell: bash
         run: |
-          # The formula follows GitHub's latest release, so prereleases and stable releases published
-          # outside the latest channel leave it alone.
-          latest="$(gh api repos/kpozin/sprawl-guard/releases/latest --jq .tag_name)"
-          if [[ "${TAG}" != "${latest}" ]]; then
-            echo "::notice::Skipping ${TAG}, because the latest Sprawl Guard release is ${latest}"
-            exit 0
-          fi
           bin/bump-sprawl-guard "${TAG}"
+          # The script leaves the formula alone when the tag isn't the latest release or the
+          # formula is already there.
           if git diff --quiet Formula/sprawl-guard.rb; then
-            echo "::notice::The formula is already at ${TAG}"
+            echo "::notice::The formula doesn't change for ${TAG}"
             exit 0
           fi
           version="${TAG#v}"
