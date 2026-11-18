@@ -6,24 +6,24 @@ class SprawlGuard < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-aarch64-apple-darwin.tar.gz"
-      sha256 "3ca8486c3246b9036d697ace279fd73e2d3c90d2275a0ea6bc391b4867adf538"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.3/sprawl-guard-0.5.3-aarch64-apple-darwin.tar.gz"
+      sha256 "0c2bd2395514133e13ad1d93ba2449ab1bef5d7973ae58e5884d62335ce13301"
     end
     on_intel do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-apple-darwin.tar.gz"
-      sha256 "fd09042ab982ddf4beedacb4379c0e3eebc0dbfc42e88cca3b98060f6e68b622"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.3/sprawl-guard-0.5.3-x86_64-apple-darwin.tar.gz"
+      sha256 "8dec3e2b1cc665627cb3ec2bb41bbe6185385ddc86cf1e9794da84ef92cf5c1a"
     end
   end
 
   # The Linux builds need glibc 2.35 or newer, as in Ubuntu 22.04 and Debian 12.
   on_linux do
     on_arm do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "78975d4720be25c38ba5032dd9124c837a42c4a1d70c2ec4381b162b5e4c3c0a"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.3/sprawl-guard-0.5.3-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "0e8a8e940b8e2a99c85ea53cba561fac4f3d34d2a1963aff5670f51fda0d615a"
     end
     on_intel do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "8d72e82d1f99d7c6fe602f7ba90b6ffa6a87a41e14b2f411ed8ec3ab7a3ad858"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.3/sprawl-guard-0.5.3-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "b08951ea62199d524f41cd60677ffb63f2b848d4e789d86c0c461a403f1c38b6"
     end
   end
 
