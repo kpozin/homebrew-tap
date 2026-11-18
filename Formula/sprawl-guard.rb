@@ -15,15 +15,15 @@ class SprawlGuard < Formula
     end
   end
 
+  # The Linux builds need glibc 2.35 or newer, as in Ubuntu 22.04 and Debian 12.
   on_linux do
     on_arm do
       url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-aarch64-unknown-linux-gnu.tar.gz"
       sha256 "78975d4720be25c38ba5032dd9124c837a42c4a1d70c2ec4381b162b5e4c3c0a"
     end
-    # The static musl build runs on any Linux distribution, whatever its glibc version.
     on_intel do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-unknown-linux-musl.tar.gz"
-      sha256 "f2682386b1575f44df09f188d709a5575dc9f6671004b4a39495428d78e5f462"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "8d72e82d1f99d7c6fe602f7ba90b6ffa6a87a41e14b2f411ed8ec3ab7a3ad858"
     end
   end
 
