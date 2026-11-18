@@ -6,24 +6,24 @@ class SprawlGuard < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.0/sprawl-guard-0.5.0-aarch64-apple-darwin.tar.gz"
-      sha256 "a90f57edbb84bd0b3840cdb0fa4988bec219455ba607d0ded292f57628be7471"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-aarch64-apple-darwin.tar.gz"
+      sha256 "3ca8486c3246b9036d697ace279fd73e2d3c90d2275a0ea6bc391b4867adf538"
     end
     on_intel do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.0/sprawl-guard-0.5.0-x86_64-apple-darwin.tar.gz"
-      sha256 "c264ebcc60c517656b32a73262bc0952596df835b3c6250b20193c97f91e33a1"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-apple-darwin.tar.gz"
+      sha256 "fd09042ab982ddf4beedacb4379c0e3eebc0dbfc42e88cca3b98060f6e68b622"
     end
   end
 
   on_linux do
     on_arm do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.0/sprawl-guard-0.5.0-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "87f7ec3beb99408f895dac528db5d70ea2588bdd6d13b6c7ef7ad8588211a5c6"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "78975d4720be25c38ba5032dd9124c837a42c4a1d70c2ec4381b162b5e4c3c0a"
     end
     # The static musl build runs on any Linux distribution, whatever its glibc version.
     on_intel do
-      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.0/sprawl-guard-0.5.0-x86_64-unknown-linux-musl.tar.gz"
-      sha256 "42e4151e63581aaa1037065af4f2d9bba09c8defc7d6b95ad8cb7d1ffd730909"
+      url "https://github.com/kpozin/sprawl-guard/releases/download/v0.5.2/sprawl-guard-0.5.2-x86_64-unknown-linux-musl.tar.gz"
+      sha256 "f2682386b1575f44df09f188d709a5575dc9f6671004b4a39495428d78e5f462"
     end
   end
 
