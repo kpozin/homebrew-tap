@@ -10,7 +10,7 @@ brew install kpozin/tap/sprawl-guard
 ```
 
 The formula installs the prebuilt binary from the Sprawl Guard release for macOS or Linux, on Arm
-or Intel. On Arm Linux, it needs glibc 2.39 or later, as in Ubuntu 24.04.
+or Intel. On Linux, it needs glibc 2.35 or later, as in Ubuntu 22.04 and Debian 12.
 
 ## Updates
 
