@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Move Formula/sprawl-guard.rb to a Sprawl Guard release.
+
+Each platform's archive URL gets the new tag and version, and its sha256 becomes the
+digest that GitHub recorded for that release asset. Before the formula changes, each
+archive is downloaded and its attestation verified, which confirms that the Sprawl Guard
+release workflow built it from the tag. Needs an authenticated `gh`.
+"""
+
+import argparse
+import hashlib
+import json
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+FORMULA = Path(__file__).resolve().parent.parent / "Formula" / "sprawl-guard.rb"
+REPOSITORY = "kpozin/sprawl-guard"
+RELEASE_WORKFLOW = f"{REPOSITORY}/.github/workflows/release.yml"
+TAG_PATTERN = re.compile(r"v(?P<version>[0-9]+\.[0-9]+\.[0-9]+)")
+
+# One platform's archive: its URL line and the sha256 line right after it.
+ARCHIVE_PATTERN = re.compile(
+    r'(?P<indent>[ ]*)url "https://github\.com/kpozin/sprawl-guard/releases/download/'
+    r'v[^/]+/sprawl-guard-[^-]+-(?P<target>[a-z0-9_-]+)\.tar\.gz"\n'
+    r'[ ]*sha256 "[0-9a-f]{64}"'
+)
+
+
+def gh(*args: str) -> str:
+    """Run `gh` and return its output, exiting if it fails.
+
+    `gh` prints its own error, such as a 404 for a tag that isn't a published release.
+    """
+    result = subprocess.run(
+        ["gh", *args], check=False, stdout=subprocess.PIPE, text=True
+    )
+    if result.returncode != 0:
+        sys.exit(f"gh {args[0]} failed")
+    return result.stdout
+
+
+def asset_digests(tag: str) -> dict[str, str]:
+    """Return each release asset's sha256 by file name."""
+    assets = gh("api", f"repos/{REPOSITORY}/releases/tags/{tag}", "--jq", ".assets")
+    digests = {}
+    for asset in json.loads(assets):
+        algorithm, _, digest = (asset.get("digest") or "").partition(":")
+        if algorithm == "sha256":
+            digests[asset["name"]] = digest
+    return digests
+
+
+def verify(tag: str, name: str, digest: str) -> None:
+    """Download one archive and confirm the release workflow built it from the tag."""
+    with tempfile.TemporaryDirectory() as directory:
+        archive = Path(directory) / name
+        gh(
+            "release",
+            "download",
+            tag,
+            "--repo",
+            REPOSITORY,
+            "--pattern",
+            name,
+            "--dir",
+            directory,
+        )
+        if hashlib.sha256(archive.read_bytes()).hexdigest() != digest:
+            sys.exit(f"{name} doesn't match the sha256 digest that GitHub recorded")
+        gh(
+            "attestation",
+            "verify",
+            str(archive),
+            "--repo",
+            REPOSITORY,
+            "--signer-workflow",
+            RELEASE_WORKFLOW,
+            "--source-ref",
+            f"refs/tags/{tag}",
+        )
+
+
+def main() -> None:
+    """Rewrite the formula's archive URLs and sha256s for the given tag."""
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("tag", help="release tag, such as v0.5.1")
+    tag = parser.parse_args().tag
+    if (match := TAG_PATTERN.fullmatch(tag)) is None:
+        parser.error(f"{tag} isn't a release tag such as v0.5.1")
+    version = match["version"]
+    digests = asset_digests(tag)
+
+    def replace(archive: re.Match[str]) -> str:
+        name = f"sprawl-guard-{version}-{archive['target']}.tar.gz"
+        if name not in digests:
+            sys.exit(f"{tag} has no sha256 digest for {name}")
+        verify(tag, name, digests[name])
+        indent = archive["indent"]
+        return (
+            f'{indent}url "https://github.com/{REPOSITORY}/releases/download/{tag}/{name}"\n'
+            f'{indent}sha256 "{digests[name]}"'
+        )
+
+    original = FORMULA.read_text()
+    formula, count = ARCHIVE_PATTERN.subn(replace, original)
+    # Every `url` must be a release archive and its sha256, so no platform stays behind.
+    if count == 0 or count != original.count('url "'):
+        sys.exit(f"{FORMULA} has a url that isn't a release archive with its sha256")
+    FORMULA.write_text(formula)
+
+
+if __name__ == "__main__":
+    main()

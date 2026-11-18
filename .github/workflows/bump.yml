@@ -1,7 +1,7 @@
 name: Bump
 
 # The Sprawl Guard release workflow starts this workflow, which opens a pull request that moves the
-# formula to the release's source archive.
+# formula to the release's prebuilt archives.
 on:
   workflow_dispatch:
     inputs:
@@ -17,9 +17,9 @@ permissions:
 jobs:
   sprawl-guard:
     runs-on: ubuntu-24.04
-    # Tapping and opening the pull request take a few minutes; a hang means Homebrew is stuck.
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Open the formula bump pull request
         shell: bash
         run: |
@@ -30,15 +30,20 @@ jobs:
             echo "::notice::Skipping ${TAG}, because the latest Sprawl Guard release is ${latest}"
             exit 0
           fi
-          # The runner image ships Homebrew without putting it on PATH.
-          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-          brew tap kpozin/tap
-          brew bump-formula-pr --no-browse --no-fork \
-            --url "https://github.com/kpozin/sprawl-guard/archive/refs/tags/${TAG}.tar.gz" \
-            kpozin/tap/sprawl-guard
+          bin/bump-sprawl-guard "${TAG}"
+          if git diff --quiet Formula/sprawl-guard.rb; then
+            echo "::notice::The formula is already at ${TAG}"
+            exit 0
+          fi
+          version="${TAG#v}"
+          branch="bump-sprawl-guard-${version}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "${branch}"
+          git commit --quiet --message "sprawl-guard ${version}" Formula/sprawl-guard.rb
+          git push --quiet origin "${branch}"
+          gh pr create --head "${branch}" --title "sprawl-guard ${version}" \
+            --body "Moves the formula to the [${TAG} release](https://github.com/kpozin/sprawl-guard/releases/tag/${TAG})."
         env:
           GH_TOKEN: ${{ github.token }}
-          HOMEBREW_GIT_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          HOMEBREW_GIT_NAME: github-actions[bot]
-          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
